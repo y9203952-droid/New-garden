@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Our Secret Garden 🌿</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+
+:root{
+  --ink:#263746;
+  --muted:#718079;
+  --green:#4d8747;
+  --dark:#315b35;
+  --paper:#fffdf7;
+  --line:#d9e1d6;
+  --pink:#c96f80;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  min-height:100vh;
+  background:linear-gradient(180deg,#fffef9 0%,#f7f9ef 100%);
+  color:var(--ink);
+  font-family:"Trebuchet MS",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+button,input,textarea{font:inherit}
+button{touch-action:manipulation}
+#auth{
+  position:fixed;inset:0;z-index:99;
+  display:grid;place-items:center;padding:20px;
+  background:linear-gradient(135deg,#fffef9,#edf5e7);
+}
+#auth.hidden,#app.hidden{display:none}
+.authbox{
+  width:min(430px,100%);
+  padding:30px;
+  border:1px solid var(--line);
+  border-radius:28px;
+  background:#fff;
+  text-align:center;
+  box-shadow:0 24px 70px #315b3520;
+}
+.authbox h1{margin:7px 0;color:var(--dark);font-size:30px}
+.authbox p{margin:0 0 18px;color:var(--muted);line-height:1.55}
+.authbox input{
+  width:100%;padding:13px 15px;margin:5px 0;
+  border:1.5px solid #d8e0d5;border-radius:13px;
+  outline:none;background:#fff;
+}
+.authbox input:focus{border-color:#8fb286;box-shadow:0 0 0 3px #8fb28622}
+.authbox button{
+  width:100%;padding:13px 16px;margin-top:10px;
+  border:0;border-radius:999px;background:var(--pink);color:#fff;
+  font-weight:800;cursor:pointer;box-shadow:0 8px 18px #c96f8030;
+}
+.authbox button:disabled{opacity:.65;cursor:wait}
+.err{min-height:21px;color:#a33;margin-top:9px;font-size:13px}
+
+.page{
+  width:min(1320px,100%);
+  margin:auto;
+  padding:18px 22px 34px;
+}
+.top{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:12px;margin-bottom:8px;
+}
+.logo{font-size:clamp(20px,2.4vw,29px);font-weight:800;color:var(--dark)}
+.logout{
+  border:1px solid #ccd7c9;background:#fff;border-radius:999px;
+  padding:8px 14px;color:#53625a;cursor:pointer;
+}
+.intro{text-align:center;margin:8px auto 20px}
+.intro h2{
+  margin:0 0 5px;
+  font-size:clamp(25px,3vw,36px);
+  line-height:1.15;color:#405247;
+}
+.intro p{
+  margin:0 auto;max-width:700px;
+  color:var(--muted);line-height:1.45;font-size:15px;
+}
+
+.workspace{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(360px,420px);
+  gap:22px;
+  align-items:start;
+}
+.gardenwrap{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.24/1;
+  min-height:500px;
+  overflow:hidden;
+  border-radius:32px;
+  background:#fffef8;
+}
+.garden{
+  position:absolute;inset:18px;
+  overflow:hidden;
+  border-radius:47% 53% 46% 54%;
+  background:
+    radial-gradient(circle at 22% 26%,#ffffff20 0 3px,transparent 4px),
+    radial-gradient(circle at 70% 34%,#ffffff20 0 3px,transparent 4px),
+    linear-gradient(145deg,#b1dc76,#8bc75d 56%,#6da54a);
+  border:2px solid #4d863f;
+  box-shadow:0 10px 0 #335a2d,0 18px 24px #2f4c3818;
+  transform:rotate(-1.5deg);
+}
+.garden:before{
+  content:"";position:absolute;inset:12px;border-radius:inherit;
+  background:repeating-linear-gradient(
+    100deg,transparent 0 22px,#28692415 23px 25px,transparent 26px 43px
+  );
+}
+.path{
+  position:absolute;width:47%;height:20%;left:33%;bottom:6%;
+  border-radius:50%;background:#c4d992;opacity:.42;
+  transform:rotate(-11deg);
+}
+.wild{
+  position:absolute;z-index:2;
+  font-size:clamp(25px,3.1vw,43px);
+  pointer-events:none;
+  filter:drop-shadow(0 3px 2px #315b3520);
+}
+.a{left:12%;top:11%}.b{left:30%;top:8%}.c{left:53%;top:14%}.d{left:74%;top:10%}
+.e{left:17%;top:48%}.f{left:57%;top:48%}.g{left:77%;top:57%}.h{left:40%;top:69%}
+.gflower{
+  position:absolute;z-index:5;
+  width:clamp(52px,6vw,82px);height:clamp(52px,6vw,82px);
+  cursor:pointer;filter:drop-shadow(0 4px 2px #1e461e2d);
+  animation:bob 4s ease-in-out infinite;
+}
+.gflower img{width:100%;height:100%;object-fit:contain}
+
+  50%{transform:translateY(-4px) rotate(2deg)}
+}
+.note{
+  position:absolute;left:20px;bottom:18px;z-index:8;
+  max-width:62%;padding:7px 11px;border-radius:11px;
+  background:#fffff2d9;color:#3d563f;font-size:12px;
+}
+
+.panel{
+  width:100%;
+  min-width:0;
+  border:1px solid #d7dfd3;
+  border-radius:22px;
+  padding:16px;
+  background:#fff;
+  box-shadow:0 8px 20px #25374610;
+}
+.panel h3{margin:0 0 3px;font-size:25px;color:#33483b}
+.sub{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.4}
+
+.drawrow{
+  display:grid;
+  grid-template-columns:50px minmax(0,1fr);
+  gap:12px;
+  align-items:start;
+}
+.drawrow>div:last-child{min-width:0}
+.palette{
+  display:flex;flex-direction:column;gap:9px;
+  align-items:center;padding-top:1px;
+}
+.color{
+  width:38px;height:38px;flex:0 0 38px;
+  border-radius:50%;border:2px solid #d9dee2;
+  cursor:pointer;box-shadow:0 1px 2px #0001;
+}
+.color.active{outline:2px dashed #263746;outline-offset:3px}
+
+.canvasbox{
+  position:relative;
+  width:100%;
+  height:min(390px,42vw);
+  min-height:280px;
+  border:3px dashed #263746;
+  border-radius:13px;
+  background:#fff;
+  overflow:hidden;
+}
+canvas{
+  width:100%;height:100%;
+  display:block;touch-action:none;cursor:crosshair;
+}
+.clear{
+  position:absolute;right:8px;top:8px;
+  width:32px;height:32px;
+  border:0;border-radius:50%;
+  background:#fff;box-shadow:0 3px 12px #0002;
+  cursor:pointer;color:#4c82c5;
+}
+
+.tools{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;margin-top:9px;
+}
+.tool{
+  min-width:0;
+  border:1.5px solid #d5ddd5;border-radius:999px;
+  padding:8px 7px;background:#fff;cursor:pointer;
+  color:#53625a;font-size:14px;white-space:nowrap;
+}
+.tool.active{border-color:#78a16f;background:#f1f7ee;color:#315b35}
+
+label{display:block;margin:13px 0 6px;font-weight:800;font-size:14px;color:#33483b}
+textarea{
+  width:100%;min-height:76px;max-height:180px;
+  padding:11px 12px;
+  border:1.5px solid #d5ddd5;border-radius:12px;
+  resize:vertical;outline:0;background:#fff;color:var(--ink);
+}
+textarea:focus{border-color:#9cba91;box-shadow:0 0 0 3px #9cba9122}
+.plant{
+  width:100%;margin-top:10px;
+  border:0;border-radius:999px;
+  padding:12px;background:var(--pink);color:#fff;
+  font-weight:800;font-size:16px;cursor:pointer;
+  box-shadow:0 7px 16px #c96f8030;
+}
+.plant:disabled{opacity:.55;cursor:wait}
+#status{
+  min-height:18px;margin:8px 0 0;
+  text-align:center;color:#6c7b72;font-size:12px;
+}
+#toast{
+  position:fixed;left:50%;bottom:20px;z-index:100;
+  max-width:90vw;padding:10px 15px;border-radius:999px;
+  background:#263746;color:#fff;font-size:13px;
+  opacity:0;pointer-events:none;
+  transform:translate(-50%,15px);transition:.25s;
+}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media(max-width:1000px){
+  .page{padding:16px 16px 30px}
+  .workspace{grid-template-columns:minmax(0,1fr) 390px;gap:16px}
+  .gardenwrap{min-height:0}
+  .canvasbox{height:330px}
+}
+@media(max-width:820px){
+  .workspace{grid-template-columns:1fr}
+  .gardenwrap{aspect-ratio:1.45/1;min-height:390px}
+  .panel{max-width:560px;margin:auto}
+}
+@media(max-width:520px){
+  .page{padding:13px 10px 26px}
+  .top{margin-bottom:5px}
+  .logout{padding:7px 11px;font-size:13px}
+  .intro{margin:7px auto 14px}
+  .intro h2{font-size:25px}
+  .intro p{font-size:13px}
+  .gardenwrap{aspect-ratio:1.05/1;min-height:330px;border-radius:24px}
+  .garden{inset:11px}
+  .wild{font-size:28px}
+  .drawrow{grid-template-columns:43px minmax(0,1fr);gap:9px}
+  .color{width:34px;height:34px;flex-basis:34px}
+  .canvasbox{height:285px;min-height:0}
+  .tools{grid-template-columns:1fr 1fr 1fr}
+  .tool{font-size:12px;padding:8px 4px}
+}
+
+</style>
+</head>
+<body>
+<section id="auth"><div class="authbox">
+<div style="font-size:58px">🌱</div><h1>Our Secret Garden</h1>
+<p>Only the two of us can enter. Draw something, write something, and plant it here.</p>
+<form id="loginForm"><input id="email" type="email" autocomplete="email" placeholder="Email" required><input id="password" type="password" autocomplete="current-password" placeholder="Password" required><button id="loginBtn">Enter our garden 🌿</button></form><div id="authError" class="err"></div>
+</div></section>
+
+<main id="app" class="hidden"><div class="page">
+<header class="top"><div class="logo">🌿 Our Secret Garden</div><button class="logout" id="logout">Log out</button></header>
+<section class="intro"><h2>A little garden made by the two of us</h2><p>Draw anything you want, write anything you want, and plant it here. Everything we plant is shared between us.</p></section>
+<section class="workspace">
+<section class="gardenwrap"><div class="garden" id="garden"><div class="path"></div>
+<div class="wild a">🌷</div><div class="wild b">🌸</div><div class="wild c">🌼</div><div class="wild d">🌻</div><div class="wild e">🌺</div><div class="wild f">🌷</div><div class="wild g">🌸</div><div class="wild h">🌼</div>
+</div></section>
+<section class="panel"><h3>Draw something</h3><p class="sub">Use the colors to draw anything. Then add a message if you want.</p>
+<div class="drawrow"><div class="palette">
+<button class="color active" data-c="#ef4e43" style="background:#ef4e43"></button><button class="color" data-c="#f68b3c" style="background:#f68b3c"></button><button class="color" data-c="#ffd166" style="background:#ffd166"></button><button class="color" data-c="#f5a6bd" style="background:#f5a6bd"></button><button class="color" data-c="#4d8f4b" style="background:#4d8f4b"></button><button class="color" data-c="#4c82c5" style="background:#4c82c5"></button><button class="color" data-c="#8c65b5" style="background:#8c65b5"></button><button class="color" data-c="#263746" style="background:#263746"></button>
+</div><div><div class="canvasbox"><canvas id="canvas"></canvas><button class="clear" id="clear">↻</button></div>
+<div class="tools"><button class="tool active" id="pen">✏️ Pen</button><button class="tool" id="eraser">🧽 Eraser</button><button class="tool" id="undo">↶ Undo</button></div>
+<label for="message">Write a message</label><textarea id="message" placeholder="Write anything you want… 💌"></textarea><button class="plant" id="plant">🌱 Plant it</button><div id="status">Draw something and plant it in our garden.</div>
+</div></div></section></section></div></main>
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL="https://hpmlrymyeioyzoohaemh.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwbWxyeW15ZWlveXpvb2hhZW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMjMzMDksImV4cCI6MjEwNTg5OTMwOX0.vHI08I_Sxv_ea34TRt8fqba1InSUqfiOmJehzUe5e40";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const auth=document.getElementById("auth"),app=document.getElementById("app"),garden=document.getElementById("garden"),canvas=document.getElementById("canvas"),ctx=canvas.getContext("2d"),statusBox=document.getElementById("status"),toast=document.getElementById("toast");
+let user=null,items=[],color="#ef4e43",mode="pen",down=false,lx=0,ly=0,history=[],drawQueued=false,lastX=0,lastY=0;
+function toastMsg(s){toast.textContent=s;toast.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>toast.classList.remove("show"),2400)}
+let lastCanvasW=0,lastCanvasH=0,lastDpr=0;
+function resize(){
+  const r=canvas.getBoundingClientRect(),w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height)),d=Math.min(2,window.devicePixelRatio||1);
+  if(w===lastCanvasW&&h===lastCanvasH&&d===lastDpr)return;
+  const snapshot=canvas.width?canvas.toDataURL("image/png"):null;
+  canvas.width=Math.round(w*d);canvas.height=Math.round(h*d);
+  ctx.setTransform(d,0,0,d,0,0);
+  ctx.lineCap="round";ctx.lineJoin="round";
+  if(snapshot){const im=new Image();im.onload=()=>ctx.drawImage(im,0,0,w,h);im.src=snapshot}
+  lastCanvasW=w;lastCanvasH=h;lastDpr=d;
+}
+function pos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+function drawSegment(x,y){
+  ctx.strokeStyle=mode==="eraser"?"#fff":color;
+  ctx.lineWidth=mode==="eraser"?22:6;
+  ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(x,y);ctx.stroke();
+  lx=x;ly=y;
+}
+canvas.onpointerdown=e=>{
+  down=true;const p=pos(e);lx=p.x;ly=p.y;
+  history.push(canvas.toDataURL("image/png"));
+  canvas.setPointerCapture?.(e.pointerId);
+};
+canvas.onpointermove=e=>{
+  if(!down)return;
+  const p=pos(e);lastX=p.x;lastY=p.y;
+  if(drawQueued)return;
+  drawQueued=true;
+  requestAnimationFrame(()=>{drawQueued=false;if(down)drawSegment(lastX,lastY)});
+};
+canvas.onpointerup=canvas.onpointercancel=e=>{
+  down=false;try{canvas.releasePointerCapture?.(e.pointerId)}catch{}
+};
+document.querySelectorAll(".color").forEach(b=>b.onclick=()=>{color=b.dataset.c;mode="pen";document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("pen").classList.add("active");document.getElementById("eraser").classList.remove("active")});
+document.getElementById("pen").onclick=()=>{mode="pen";document.getElementById("pen").classList.add("active");document.getElementById("eraser").classList.remove("active")};
+document.getElementById("eraser").onclick=()=>{mode="eraser";document.getElementById("eraser").classList.add("active");document.getElementById("pen").classList.remove("active")};
+document.getElementById("clear").onclick=()=>{history.push(canvas.toDataURL());ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight)};
+document.getElementById("undo").onclick=()=>{const d=history.pop();if(!d)return;const im=new Image();im.onload=()=>{ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);ctx.drawImage(im,0,0,canvas.clientWidth,canvas.clientHeight)};im.src=d};
+function blank(){const p=ctx.getImageData(0,0,canvas.width,canvas.height).data;for(let i=3;i<p.length;i+=4)if(p[i])return false;return true}
+function render(){garden.querySelectorAll(".gflower").forEach(x=>x.remove());items.forEach((x,i)=>{if(!x.drawing_data)return;const el=document.createElement("div");el.className="gflower";let p=x.pos;if(typeof p==="string")try{p=JSON.parse(p)}catch{p=null}p=p||{left:8+Math.random()*76,top:8+Math.random()*70};el.style.left=Math.max(5,Math.min(85,Number(p.left)))+"%";el.style.top=Math.max(5,Math.min(78,Number(p.top)))+"%";el.style.animationDelay=i*.15+"s";const im=document.createElement("img");im.src=x.drawing_data;im.alt=x.message||"A garden drawing";el.appendChild(im);el.onclick=()=>toastMsg(x.message||"A little drawing from our garden. 🌿");garden.appendChild(el)})}
+async function load(){if(!user)return;statusBox.textContent="Loading our shared garden… 🌱";const {data,error}=await sb.from("flowers").select("*").order("created_at",{ascending:true});if(error){statusBox.textContent="Could not load the garden: "+error.message;console.error(error);return}items=data||[];render();statusBox.textContent=items.length?`${items.length} little creation${items.length===1?"":"s"} growing here. 🌸`:"The garden is waiting for its first drawing. 🌱"}
+async function authUI(session){user=session?.user||null;if(!user){auth.classList.remove("hidden");app.classList.add("hidden");return}auth.classList.add("hidden");app.classList.remove("hidden");requestAnimationFrame(resize);await load()}
+document.getElementById("loginForm").onsubmit=async e=>{e.preventDefault();document.getElementById("authError").textContent="";const btn=document.getElementById("loginBtn");btn.disabled=true;btn.textContent="Opening our garden… 🌿";try{const {error}=await sb.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});if(error)throw error}catch(err){document.getElementById("authError").textContent=err.message||"Could not sign in.";btn.disabled=false;btn.textContent="Enter our garden 🌿"}};
+document.getElementById("logout").onclick=()=>sb.auth.signOut();
+document.getElementById("plant").onclick=async()=>{if(!user)return;if(blank()&&!document.getElementById("message").value.trim()){toastMsg("Draw something or write a message first. 🌱");return}const b=document.getElementById("plant");b.disabled=true;b.textContent="Planting… 🌱";const drawing=blank()?"":canvas.toDataURL("image/png");const row={type:"drawing",emoji:"🎨",name:"Garden drawing",message:document.getElementById("message").value.trim(),drawing_data:drawing,pos:{left:8+Math.random()*76,top:8+Math.random()*70}};try{const {data,error}=await sb.from("flowers").insert([row]).select().single();if(error)throw error;items.push(data);render();ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);history=[];document.getElementById("message").value="";statusBox.textContent="Your creation is growing in our garden. 🌸";toastMsg("Planted in our secret garden! 🌿")}catch(err){statusBox.textContent="Could not plant it: "+err.message;toastMsg("Could not save it.")}b.disabled=false;b.textContent="🌱 Plant it"};
+sb.auth.onAuthStateChange((_e,s)=>setTimeout(()=>authUI(s),0));
+let reloadTimer=null;
+sb.channel("secret-garden")
+  .on("postgres_changes",{event:"*",schema:"public",table:"flowers"},()=>{
+    if(!user)return;
+    clearTimeout(reloadTimer);
+    reloadTimer=setTimeout(load,350);
+  })
+  .subscribe();
+let resizeTimer=null;window.addEventListener("resize",()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(resize,120)});requestAnimationFrame(resize);sb.auth.getSession().then(({data})=>authUI(data.session));
+</script>
+</body>
+</html>
