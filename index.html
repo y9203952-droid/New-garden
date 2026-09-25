@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Our Secret Garden 🌿</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#263746;--green:#4d8747;--dark:#315b35;--grass:#8ac85b;--paper:#fffdf7}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Trebuchet MS",system-ui,sans-serif}
+button,input,textarea{font:inherit}
+#auth{position:fixed;inset:0;z-index:99;display:grid;place-items:center;padding:20px;background:#fffdf7}
+#auth.hidden,#app.hidden{display:none}.authbox{width:min(430px,100%);padding:32px;border:2px solid #d8dfcf;border-radius:28px;background:#fff;text-align:center;box-shadow:0 20px 70px #2d4b2d20}.authbox h1{color:var(--dark);margin:8px 0}.authbox p{color:#6b776f;line-height:1.5}.authbox input{width:100%;padding:14px;margin:6px 0;border:2px solid #dce2d7;border-radius:14px}.authbox button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:999px;background:#c96f80;color:white;font-weight:700}.err{min-height:22px;color:#a33;margin-top:10px;font-size:14px}
+.page{max-width:1500px;margin:auto;padding:22px clamp(14px,4vw,55px) 40px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px}.logo{font-size:clamp(22px,3vw,34px);font-weight:800;color:var(--dark)}.logout{border:2px solid #ccd6ca;background:white;border-radius:999px;padding:9px 15px}
+.intro{text-align:center;margin:18px auto 25px}.intro h2{margin:0 0 6px;font-size:clamp(26px,3.5vw,43px);color:#405247}.intro p{margin:auto;max-width:760px;color:#6b756f;line-height:1.55}
+.workspace{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(360px,.75fr);gap:28px;align-items:start}
+.gardenwrap{min-height:650px;position:relative;overflow:hidden;border-radius:40px;background:#fffef8}.garden{position:absolute;inset:25px;overflow:hidden;border-radius:48% 52% 46% 54%;background:radial-gradient(circle at 25% 30%,#ffffff22 0 3px,transparent 4px),radial-gradient(circle at 65% 25%,#ffffff22 0 3px,transparent 4px),linear-gradient(145deg,#acd96e,#86c25a 55%,#6ca447);border:3px solid #4d863f;box-shadow:0 22px 0 #335a2d,0 32px 38px #2f4c3822;transform:rotate(-2deg)}
+.garden:before{content:"";position:absolute;inset:14px;border-radius:inherit;background:repeating-linear-gradient(100deg,transparent 0 18px,#28692418 19px 21px,transparent 22px 38px)}
+.path{position:absolute;width:48%;height:22%;left:34%;bottom:4%;border-radius:50%;background:#b6ce87;opacity:.45;transform:rotate(-11deg)}
+.wild{position:absolute;z-index:2;font-size:clamp(28px,3vw,48px);pointer-events:none}.a{left:13%;top:12%}.b{left:30%;top:8%}.c{left:53%;top:17%}.d{left:73%;top:11%}.e{left:18%;top:48%}.f{left:58%;top:49%}.g{left:76%;top:58%}.h{left:40%;top:70%}
+.gflower{position:absolute;z-index:5;width:clamp(55px,7vw,95px);height:clamp(55px,7vw,95px);cursor:pointer;filter:drop-shadow(0 5px 2px #1e461e2d);animation:bob 4s ease-in-out infinite}.gflower img{width:100%;height:100%;object-fit:contain}@keyframes bob{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-5px) rotate(2deg)}}
+.note{position:absolute;left:32px;bottom:22px;z-index:8;max-width:60%;padding:8px 13px;border-radius:12px;background:#fffff5d9;color:#3d563f;font-size:13px}
+.panel{border:2px solid #263746;border-radius:24px;padding:18px;background:#fffef9;box-shadow:0 12px 30px #25374617}.panel h3{margin:0 0 5px;font-size:28px}.sub{margin:0 0 14px;color:#718079;font-size:14px}
+.drawrow{display:grid;grid-template-columns:58px 1fr;gap:13px}.palette{display:flex;flex-direction:column;gap:11px;align-items:center}.color{width:42px;height:42px;border-radius:50%;border:3px solid #d9dee2;cursor:pointer}.color.active{outline:3px dashed #263746;outline-offset:3px}
+.canvasbox{position:relative;aspect-ratio:1.05/1;min-height:310px;border:4px dashed #263746;border-radius:12px;background:white;overflow:hidden}canvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}.clear{position:absolute;right:10px;top:10px;width:36px;height:36px;border:0;border-radius:50%;background:white;box-shadow:0 3px 12px #0002;cursor:pointer}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.tool{border:2px solid #d5ddd5;border-radius:999px;padding:8px 12px;background:white;cursor:pointer}.tool.active{border-color:#4d7e49;background:#edf6e8}
+label{display:block;margin:16px 0 7px;font-weight:700}textarea{width:100%;min-height:90px;padding:12px;border:2px solid #d5ddd5;border-radius:14px;resize:vertical;outline:0}textarea:focus{border-color:#9cba91}
+.plant{width:100%;margin-top:12px;border:2px solid #315b35;border-radius:999px;padding:13px;background:white;color:#315b35;font-weight:800;font-size:18px;cursor:pointer}.plant:disabled{opacity:.55}
+#status{min-height:20px;margin:10px 0 0;text-align:center;color:#6c7b72;font-size:13px}#toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);z-index:100;max-width:90vw;padding:12px 17px;border-radius:999px;background:#263746;color:white;opacity:0;pointer-events:none;transition:.25s}#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:950px){.workspace{grid-template-columns:1fr}.gardenwrap{min-height:560px}}
+@media(max-width:620px){.page{padding:16px 11px 30px}.gardenwrap{min-height:420px;border-radius:28px}.garden{inset:13px}.drawrow{grid-template-columns:44px 1fr}.color{width:34px;height:34px}.canvasbox{min-height:270px}.panel h3{font-size:24px}}
+</style>
+</head>
+<body>
+<section id="auth"><div class="authbox">
+<div style="font-size:58px">🌱</div><h1>Our Secret Garden</h1>
+<p>Only the two of us can enter. Draw something, write something, and plant it here.</p>
+<form id="loginForm"><input id="email" type="email" autocomplete="email" placeholder="Email" required><input id="password" type="password" autocomplete="current-password" placeholder="Password" required><button id="loginBtn">Enter our garden 🌿</button></form><div id="authError" class="err"></div>
+</div></section>
+
+<main id="app" class="hidden"><div class="page">
+<header class="top"><div class="logo">🌿 Our Secret Garden</div><button class="logout" id="logout">Log out</button></header>
+<section class="intro"><h2>A little garden made by the two of us</h2><p>Draw anything you want, write anything you want, and plant it here. Everything we plant is shared between us.</p></section>
+<section class="workspace">
+<section class="gardenwrap"><div class="garden" id="garden"><div class="path"></div>
+<div class="wild a">🌷</div><div class="wild b">🌸</div><div class="wild c">🌼</div><div class="wild d">🌻</div><div class="wild e">🌺</div><div class="wild f">🌷</div><div class="wild g">🌸</div><div class="wild h">🌼</div>
+<div class="note">Everything we plant here belongs to our little world. 💚</div></div></section>
+<section class="panel"><h3>Draw something</h3><p class="sub">Use the colors to draw anything. Then add a message if you want.</p>
+<div class="drawrow"><div class="palette">
+<button class="color active" data-c="#ef4e43" style="background:#ef4e43"></button><button class="color" data-c="#f68b3c" style="background:#f68b3c"></button><button class="color" data-c="#ffd166" style="background:#ffd166"></button><button class="color" data-c="#f5a6bd" style="background:#f5a6bd"></button><button class="color" data-c="#4d8f4b" style="background:#4d8f4b"></button><button class="color" data-c="#4c82c5" style="background:#4c82c5"></button><button class="color" data-c="#8c65b5" style="background:#8c65b5"></button><button class="color" data-c="#263746" style="background:#263746"></button>
+</div><div><div class="canvasbox"><canvas id="canvas"></canvas><button class="clear" id="clear">↻</button></div>
+<div class="tools"><button class="tool active" id="pen">✏️ Pen</button><button class="tool" id="eraser">🧽 Eraser</button><button class="tool" id="undo">↶ Undo</button></div>
+<label for="message">Write a message</label><textarea id="message" placeholder="Write anything you want… 💌"></textarea><button class="plant" id="plant">🌱 Plant it</button><div id="status">Draw something and plant it in our garden.</div>
+</div></div></section></section></div></main>
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL="https://hpmlrymyeioyzoohaemh.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhwbWxyeW15ZWlveXpvb2hhZW1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAzMjMzMDksImV4cCI6MjEwNTg5OTMwOX0.vHI08I_Sxv_ea34TRt8fqba1InSUqfiOmJehzUe5e40";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const auth=document.getElementById("auth"),app=document.getElementById("app"),garden=document.getElementById("garden"),canvas=document.getElementById("canvas"),ctx=canvas.getContext("2d"),statusBox=document.getElementById("status"),toast=document.getElementById("toast");
+let user=null,items=[],color="#ef4e43",mode="pen",down=false,lx=0,ly=0,history=[];
+function toastMsg(s){toast.textContent=s;toast.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>toast.classList.remove("show"),2800)}
+function resize(){const r=canvas.getBoundingClientRect(),old=document.createElement("canvas");if(canvas.width){old.width=canvas.width;old.height=canvas.height;old.getContext("2d").drawImage(canvas,0,0)}const d=devicePixelRatio||1;canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);ctx.lineCap="round";ctx.lineJoin="round";if(old.width)ctx.drawImage(old,0,0,old.width,old.height,0,0,r.width,r.height)}
+function pos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+canvas.onpointerdown=e=>{down=true;const p=pos(e);lx=p.x;ly=p.y;history.push(canvas.toDataURL());canvas.setPointerCapture?.(e.pointerId)}
+canvas.onpointermove=e=>{if(!down)return;const p=pos(e);ctx.strokeStyle=mode==="eraser"?"#fff":color;ctx.lineWidth=mode==="eraser"?24:7;ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(p.x,p.y);ctx.stroke();lx=p.x;ly=p.y}
+canvas.onpointerup=canvas.onpointercancel=e=>{down=false;try{canvas.releasePointerCapture?.(e.pointerId)}catch{}}
+document.querySelectorAll(".color").forEach(b=>b.onclick=()=>{color=b.dataset.c;mode="pen";document.querySelectorAll(".color").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.getElementById("pen").classList.add("active");document.getElementById("eraser").classList.remove("active")});
+document.getElementById("pen").onclick=()=>{mode="pen";document.getElementById("pen").classList.add("active");document.getElementById("eraser").classList.remove("active")};
+document.getElementById("eraser").onclick=()=>{mode="eraser";document.getElementById("eraser").classList.add("active");document.getElementById("pen").classList.remove("active")};
+document.getElementById("clear").onclick=()=>{history.push(canvas.toDataURL());ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight)};
+document.getElementById("undo").onclick=()=>{const d=history.pop();if(!d)return;const im=new Image();im.onload=()=>{ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);ctx.drawImage(im,0,0,canvas.clientWidth,canvas.clientHeight)};im.src=d};
+function blank(){const p=ctx.getImageData(0,0,canvas.width,canvas.height).data;for(let i=3;i<p.length;i+=4)if(p[i])return false;return true}
+function render(){garden.querySelectorAll(".gflower").forEach(x=>x.remove());items.forEach((x,i)=>{if(!x.drawing_data)return;const el=document.createElement("div");el.className="gflower";let p=x.pos;if(typeof p==="string")try{p=JSON.parse(p)}catch{p=null}p=p||{left:8+Math.random()*76,top:8+Math.random()*70};el.style.left=Math.max(5,Math.min(85,Number(p.left)))+"%";el.style.top=Math.max(5,Math.min(78,Number(p.top)))+"%";el.style.animationDelay=i*.15+"s";const im=document.createElement("img");im.src=x.drawing_data;im.alt=x.message||"A garden drawing";el.appendChild(im);el.onclick=()=>toastMsg(x.message||"A little drawing from our garden. 🌿");garden.appendChild(el)})}
+async function load(){if(!user)return;statusBox.textContent="Loading our shared garden… 🌱";const {data,error}=await sb.from("flowers").select("*").order("created_at",{ascending:true});if(error){statusBox.textContent="Could not load the garden: "+error.message;console.error(error);return}items=data||[];render();statusBox.textContent=items.length?`${items.length} little creation${items.length===1?"":"s"} growing here. 🌸`:"The garden is waiting for its first drawing. 🌱"}
+async function authUI(session){user=session?.user||null;if(!user){auth.classList.remove("hidden");app.classList.add("hidden");return}auth.classList.add("hidden");app.classList.remove("hidden");requestAnimationFrame(resize);await load()}
+document.getElementById("loginForm").onsubmit=async e=>{e.preventDefault();document.getElementById("authError").textContent="";const btn=document.getElementById("loginBtn");btn.disabled=true;btn.textContent="Opening our garden… 🌿";try{const {error}=await sb.auth.signInWithPassword({email:document.getElementById("email").value.trim(),password:document.getElementById("password").value});if(error)throw error}catch(err){document.getElementById("authError").textContent=err.message||"Could not sign in.";btn.disabled=false;btn.textContent="Enter our garden 🌿"}};
+document.getElementById("logout").onclick=()=>sb.auth.signOut();
+document.getElementById("plant").onclick=async()=>{if(!user)return;if(blank()&&!document.getElementById("message").value.trim()){toastMsg("Draw something or write a message first. 🌱");return}const b=document.getElementById("plant");b.disabled=true;b.textContent="Planting… 🌱";const drawing=blank()?"":canvas.toDataURL("image/png");const row={type:"drawing",emoji:"🎨",name:"Garden drawing",message:document.getElementById("message").value.trim(),drawing_data:drawing,pos:{left:8+Math.random()*76,top:8+Math.random()*70}};try{const {data,error}=await sb.from("flowers").insert([row]).select().single();if(error)throw error;items.push(data);render();ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);history=[];document.getElementById("message").value="";statusBox.textContent="Your creation is growing in our garden. 🌸";toastMsg("Planted in our secret garden! 🌿")}catch(err){statusBox.textContent="Could not plant it: "+err.message;toastMsg("Could not save it.")}b.disabled=false;b.textContent="🌱 Plant it"};
+sb.auth.onAuthStateChange((_e,s)=>setTimeout(()=>authUI(s),0));
+sb.channel("secret-garden").on("postgres_changes",{event:"*",schema:"public",table:"flowers"},()=>{if(user)load()}).subscribe();
+window.addEventListener("resize",resize);requestAnimationFrame(resize);sb.auth.getSession().then(({data})=>authUI(data.session));
+</script>
+</body>
+</html>
