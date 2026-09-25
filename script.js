@@ -1065,19 +1065,51 @@ if (loginForm) {
         supabaseClient;
 
 
-      const {
-        error
-      } =
-        await client.auth
-          .signInWithPassword({
+    async function login() {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-            email:
-              email,
+  const button = document.getElementById("loginBtn");
 
-            password:
-              password
+  button.disabled = true;
+  button.textContent = "Signing in... 🌿";
 
-          });
+  try {
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+    if (error) {
+      console.error("LOGIN ERROR:", error);
+
+      alert("Login failed:\n\n" + error.message);
+
+      button.disabled = false;
+      button.textContent = "Enter our garden 🌿";
+      return;
+    }
+
+    console.log("LOGIN SUCCESS:", data);
+
+    await loadFlowers();
+
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("gardenScreen").style.display = "block";
+
+    button.disabled = false;
+    button.textContent = "Enter our garden 🌿";
+
+  } catch (err) {
+    console.error("LOGIN CRASH:", err);
+
+    alert("Something went wrong:\n\n" + err.message);
+
+    button.disabled = false;
+    button.textContent = "Enter our garden 🌿";
+  }
+}
 
 
       if (button) {
